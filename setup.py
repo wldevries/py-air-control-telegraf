@@ -10,7 +10,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'my-air-monitor = my_air_monitor.monitor:monitor_and_send',
+            'my-air-monitor = my_air_monitor.monitor:main',
         ],
     },
 )

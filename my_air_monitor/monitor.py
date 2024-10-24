@@ -3,6 +3,7 @@ import logging
 import socket
 import subprocess
 import re
+import time
 
 def get_air_purifier_data(ipaddr):
     try:
@@ -53,24 +54,9 @@ def send_to_telegraf_udp(server_address, ipaddr, fan_speed, pm25, iaql, ddp):
     finally:
         sock.close()
 
-
-def main():
-    parser = argparse.ArgumentParser(description="Monitor air purifiers by IP address.")    
-
-    # Add an optional argument for the InfluxDB server address
-    parser.add_argument('--server_address', metavar='IP:PORT', default='localhost:8094', 
-                        help='IP address and port of the InfluxDB server (default: localhost:8094)')
-                        
-    # Add a positional argument to accept one or more air purifier IP addresses
-    parser.add_argument('ip_addresses', metavar='IP', nargs='+', 
-                        help='IP address(es) of the air purifiers')
-
-    args = parser.parse_args()
-
-    # Parse the server address
-    server_address = parse_server_address(args.server_address)
-
-    for ipaddr in args.ip_addresses:
+def send_data(server_address, ip_addresses):    
+    # Loop through each IP address
+    for ipaddr in ip_addresses:
         print(f"\nFetching data for IP: {ipaddr}")
         data = get_air_purifier_data(ipaddr)
         if data is None:
@@ -88,6 +74,34 @@ def parse_server_address(address):
     # Split the IP and port
     ip, port = address.split(':')
     return (ip, int(port))
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Monitor air purifiers by IP address.")    
+
+    # Add an optional argument for the InfluxDB server address
+    parser.add_argument('-s', '--server_address', metavar='IP:PORT', default='localhost:8094', 
+                        help='IP address and port of the InfluxDB server (default: localhost:8094)')
+
+
+    # Add an optional argument for the InfluxDB server address
+    parser.add_argument('--interval', metavar='INTERVAL_SECONDS', default='60', 
+                        help='Seconds between updates (default: 60)')
+                        
+    # Add a positional argument to accept one or more air purifier IP addresses
+    parser.add_argument('ip_addresses', metavar='IP', nargs='+', 
+                        help='IP address(es) of the air purifiers')
+
+    args = parser.parse_args()
+
+    # Parse the server address
+    server_address = parse_server_address(args.server_address)
+
+    while True:
+        send_data(server_address, args.ip_addresses)
+
+        # Sleep for the specified interval
+        time.sleep(args.interval)
 
 if __name__ == "__main__":
     main()

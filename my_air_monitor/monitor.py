@@ -1,12 +1,29 @@
+import argparse
+import logging
+import socket
 import subprocess
 import re
-import argparse
-import socket
 
 def get_air_purifier_data(ipaddr):
-    result = subprocess.run(['airctrl', '--ipaddr', ipaddr], stdout=subprocess.PIPE)
-    output = result.stdout.decode('utf-8')
-    return parse_output(output)
+    try:
+        # Run the airctrl command and capture output
+        result = subprocess.run(['airctrl', '--ipaddr', ipaddr], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+        
+        # Decode output
+        output = result.stdout.decode('utf-8')
+        return parse_output(output)
+    
+    except subprocess.CalledProcessError as e:
+        logging.error(f"Error calling airctrl for IP {ipaddr}: {e.stderr.decode('utf-8')}")
+        return None
+    
+    except OSError as e:
+        logging.error(f"OS error occurred while trying to reach IP {ipaddr}: {e}")
+        return None
+    
+    except Exception as e:
+        logging.error(f"An unexpected error occurred for IP {ipaddr}: {e}")
+        return None
 
 def parse_output(output):
     data = {}
@@ -56,6 +73,8 @@ def main():
     for ipaddr in args.ip_addresses:
         print(f"\nFetching data for IP: {ipaddr}")
         data = get_air_purifier_data(ipaddr)
+        if data is None:
+            continue
         
         # Focus on specific values
         fan_speed = data.get('om')  # Fan speed

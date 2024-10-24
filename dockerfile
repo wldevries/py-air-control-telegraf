@@ -4,11 +4,11 @@ FROM python:3.9-slim
 # Set the working directory in the container
 WORKDIR /usr/src/app
 
-# Copy the current directory contents into the container
-COPY . .
+# Copy the current directory contents into the container at /usr/src/app
+COPY . /usr/src/app
 
-# Install any required packages (if needed)
-RUN pip install --no-cache-dir -r requirements.txt
+# Install dependencies from setup.py
+RUN pip install .
 
-# Run the Python script when the container launches
-CMD ["python", "./monitor.py"]
+# Define the command to run your script (the entry point created in setup.py)
+CMD ["my-air-monitor"]

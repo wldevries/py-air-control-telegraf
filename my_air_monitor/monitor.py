@@ -96,12 +96,13 @@ def main():
 
     # Parse the server address
     server_address = parse_server_address(args.server_address)
+    wait_seconds = int(args.interval)
 
     while True:
         send_data(server_address, args.ip_addresses)
 
         # Sleep for the specified interval
-        time.sleep(args.interval)
+        time.sleep(wait_seconds)
 
 if __name__ == "__main__":
     main()

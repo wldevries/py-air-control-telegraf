@@ -11,4 +11,4 @@ COPY . /usr/src/app
 RUN pip install .
 
 # Define the command to run your script (the entry point created in setup.py)
-CMD ["my-air-monitor"]
+ENTRYPOINT ["my-air-monitor"]

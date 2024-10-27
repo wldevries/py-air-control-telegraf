@@ -43,7 +43,7 @@ def parse_output(output):
 
 def send_to_telegraf_udp(server_address, ipaddr, fan_speed, pm25, iaql, ddp):
     # send data in InfluxDB line protocol format
-    data = f"air_purifier,device=philips_fan,ipaddr={ipaddr} speed={fan_speed},pm25={pm25},iaql={iaql},ddp=\"{ddp}\""
+    data = f"air_purifier,ipaddr={ipaddr} speed={fan_speed},pm25={pm25},iaql={iaql},ddp=\"{ddp}\""
     
     print(f"Sending data to Telegraf at {server_address}: {data}")
 
@@ -81,7 +81,7 @@ def main():
 
     # Add an optional argument for the InfluxDB server address
     parser.add_argument('-s', '--server_address', metavar='IP:PORT', default='localhost:8094', 
-                        help='IP address and port of the InfluxDB server (default: localhost:8094)')
+                        help='IP address and port of InfluxDB Telegraf UDP Socker server (default: localhost:8094)')
 
 
     # Add an optional argument for the InfluxDB server address
@@ -97,6 +97,9 @@ def main():
     # Parse the server address
     server_address = parse_server_address(args.server_address)
     wait_seconds = int(args.interval)
+
+    if (args.ip_addresses is None) or (len(args.ip_addresses) == 0):
+        return
 
     while True:
         send_data(server_address, args.ip_addresses)
